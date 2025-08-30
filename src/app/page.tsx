@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Link as LinkIcon, RotateCcw, ExternalLink } from "lucide-react"
+import { Link as LinkIcon, RotateCcw, ExternalLink, Copy, CheckCircle } from "lucide-react"
 import { SignJWT, importPKCS8 } from "jose"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,6 +14,7 @@ import { useAppStore } from "@/lib/store"
 export default function HomePage() {
   const [expirationTime, setExpirationTime] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isCopied, setIsCopied] = useState(false)
 
   const { toast } = useToast()
   const { 
@@ -110,7 +111,8 @@ export default function HomePage() {
 
       toast({
         title: "JWT Generated Successfully",
-        description: "Token has been generated and is ready for use."
+        description: "Token has been generated and is ready for use.",
+        className: "border-primary bg-primary/10 text-primary [&>div]:text-primary"
       })
 
     } catch (error) {
@@ -139,6 +141,36 @@ export default function HomePage() {
     if (jwtToken) {
       const url = `https://jwt.io/#debugger-io?token=${jwtToken}`
       window.open(url, '_blank')
+    }
+  }
+
+  const copyToClipboard = async () => {
+    if (jwtToken) {
+      try {
+        await navigator.clipboard.writeText(jwtToken)
+        setIsCopied(true)
+        toast({
+          title: "JWT Copied",
+          description: "Token has been copied to clipboard",
+          className: "border-primary bg-primary/10 text-primary [&>div]:text-primary"
+        })
+        setTimeout(() => setIsCopied(false), 2000)
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Copy Failed",
+          description: "Failed to copy JWT to clipboard"
+        })
+      }
+    }
+  }
+
+  const parseJWT = (token: string) => {
+    const parts = token.split('.')
+    return {
+      header: parts[0] || '',
+      payload: parts[1] || '',
+      signature: parts[2] || ''
     }
   }
 
@@ -279,12 +311,70 @@ Your private key content
                 variant="outline"
                 onClick={decodeJWT}
                 disabled={!jwtToken}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 border-primary/50 text-primary hover:bg-primary/10 hover:border-primary disabled:border-border disabled:text-muted-foreground"
               >
                 <ExternalLink className="w-4 h-4" />
                 Decode JWT
               </Button>
             </div>
+
+            {/* JWT Display */}
+            {jwtToken && (
+              <div className="mt-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label className="text-lg font-semibold">Generated JWT</Label>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={copyToClipboard}
+                    className="flex items-center gap-2"
+                  >
+                    {isCopied ? (
+                      <>
+                        <CheckCircle className="w-4 h-4" />
+                        Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4" />
+                        Copy JWT
+                      </>
+                    )}
+                  </Button>
+                </div>
+                
+                <div className="bg-secondary/20 border border-border rounded-lg p-4">
+                  <div className="font-mono text-sm break-all leading-relaxed">
+                    <span className="text-primary font-semibold">
+                      {parseJWT(jwtToken).header}
+                    </span>
+                    <span className="text-muted-foreground">.</span>
+                    <span className="text-yellow-400 font-semibold">
+                      {parseJWT(jwtToken).payload}
+                    </span>
+                    <span className="text-muted-foreground">.</span>
+                    <span className="text-red-400 font-semibold">
+                      {parseJWT(jwtToken).signature}
+                    </span>
+                  </div>
+                  
+                  <div className="mt-4 flex flex-wrap gap-4 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-primary rounded-full"></div>
+                      <span>Header</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                      <span>Payload</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+                      <span>Signature</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
