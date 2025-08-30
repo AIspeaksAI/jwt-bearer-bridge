@@ -12,17 +12,19 @@ import { useToast } from "@/hooks/use-toast"
 import { useAppStore } from "@/lib/store"
 
 export default function HomePage() {
-  const [algorithm, setAlgorithm] = useState("RS256")
-  const [issuer, setIssuer] = useState("")
-  const [subject, setSubject] = useState("")
-  const [audience, setAudience] = useState("https://login.salesforce.com")
-  const [expiration, setExpiration] = useState("3600")
-  const [privateKey, setPrivateKey] = useState("")
   const [expirationTime, setExpirationTime] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
 
   const { toast } = useToast()
-  const { jwtToken, setJwtToken } = useAppStore()
+  const { 
+    jwtFormData, 
+    setJwtFormData, 
+    resetJwtForm, 
+    jwtToken, 
+    setJwtToken 
+  } = useAppStore()
+
+  const { algorithm, issuer, subject, audience, expiration, privateKey } = jwtFormData
 
   // Calculate and update expiration time display
   useEffect(() => {
@@ -41,11 +43,11 @@ export default function HomePage() {
   }, [expiration])
 
   const resetAlgorithm = () => {
-    setAlgorithm("RS256")
+    setJwtFormData({ algorithm: "RS256" })
   }
 
   const resetExpiration = () => {
-    setExpiration("3600")
+    setJwtFormData({ expiration: "3600" })
   }
 
   const generateJWT = async () => {
@@ -173,7 +175,7 @@ export default function HomePage() {
                       Reset
                     </Button>
                   </div>
-                  <Select value={algorithm} onValueChange={setAlgorithm}>
+                  <Select value={algorithm} onValueChange={(value) => setJwtFormData({ algorithm: value })}>
                     <SelectTrigger id="algorithm">
                       <SelectValue />
                     </SelectTrigger>
@@ -189,7 +191,7 @@ export default function HomePage() {
                   <Input
                     id="issuer"
                     value={issuer}
-                    onChange={(e) => setIssuer(e.target.value)}
+                    onChange={(e) => setJwtFormData({ issuer: e.target.value })}
                     placeholder="Your Connected App Consumer Key"
                     className="mt-2"
                   />
@@ -201,7 +203,7 @@ export default function HomePage() {
                   <Input
                     id="subject"
                     value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
+                    onChange={(e) => setJwtFormData({ subject: e.target.value })}
                     placeholder="Salesforce Username"
                     className="mt-2"
                   />
@@ -216,7 +218,7 @@ export default function HomePage() {
                   <Input
                     id="audience"
                     value={audience}
-                    onChange={(e) => setAudience(e.target.value)}
+                    onChange={(e) => setJwtFormData({ audience: e.target.value })}
                     className="mt-2"
                   />
                 </div>
@@ -239,7 +241,7 @@ export default function HomePage() {
                     id="expiration"
                     type="number"
                     value={expiration}
-                    onChange={(e) => setExpiration(e.target.value)}
+                    onChange={(e) => setJwtFormData({ expiration: e.target.value })}
                     className="mt-2"
                   />
                   <p className="text-sm text-muted-foreground mt-1">
@@ -255,7 +257,7 @@ export default function HomePage() {
               <Textarea
                 id="privateKey"
                 value={privateKey}
-                onChange={(e) => setPrivateKey(e.target.value)}
+                onChange={(e) => setJwtFormData({ privateKey: e.target.value })}
                 placeholder={`-----BEGIN PRIVATE KEY-----
 Your private key content
 -----END PRIVATE KEY-----`}
