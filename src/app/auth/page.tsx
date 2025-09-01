@@ -5,6 +5,7 @@ import { Shield, ChevronDown, ChevronUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { useAppStore } from "@/lib/store"
+import ReactJsonView from "@microlink/react-json-view"
 
 interface SalesforceResponse {
   access_token?: string
@@ -189,9 +190,21 @@ export default function AuthPage() {
 
                 {isResponseExpanded && (
                   <div className="bg-secondary/20 border border-border rounded-lg p-4">
-                    <pre className="text-sm font-mono text-card-foreground whitespace-pre-wrap break-all">
-                      {JSON.stringify(response, null, 2)}
-                    </pre>
+                    <div className="max-h-96 overflow-y-auto">
+                      <ReactJsonView
+                        src={response}
+                        theme="monokai"
+                        style={{
+                          backgroundColor: 'transparent',
+                          fontSize: '13px'
+                        }}
+                        collapsed={false}
+                        displayObjectSize={true}
+                        displayDataTypes={false}
+                        enableClipboard={true}
+                        name="authResponse"
+                      />
+                    </div>
                   </div>
                 )}
 

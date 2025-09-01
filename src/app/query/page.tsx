@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { useAppStore } from "@/lib/store"
+import ReactJsonView from "@microlink/react-json-view"
 
 interface SalesforceQueryResponse {
   totalSize?: number
@@ -242,9 +243,21 @@ export default function QueryPage() {
                 {/* Expanded Results */}
                 {isResultsExpanded && (
                   <div className="bg-secondary/20 border border-border rounded-lg p-4">
-                    <pre className="text-sm font-mono text-card-foreground whitespace-pre-wrap break-all max-h-96 overflow-y-auto">
-                      {JSON.stringify(formatResults(queryResults), null, 2)}
-                    </pre>
+                    <div className="max-h-96 overflow-y-auto">
+                      <ReactJsonView
+                        src={formatResults(queryResults)}
+                        theme="monokai"
+                        style={{
+                          backgroundColor: 'transparent',
+                          fontSize: '13px'
+                        }}
+                        collapsed={2}
+                        displayObjectSize={true}
+                        displayDataTypes={false}
+                        enableClipboard={true}
+                        name="queryResults"
+                      />
+                    </div>
                   </div>
                 )}
 
