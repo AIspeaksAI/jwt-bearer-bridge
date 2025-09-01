@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Database, ChevronDown, ChevronUp, Play } from "lucide-react"
+import { Database, ChevronDown, ChevronUp, Play, RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -27,6 +27,10 @@ export default function QueryPage() {
 
   const { toast } = useToast()
   const { accessToken, instanceUrl } = useAppStore()
+
+  const resetQuery = () => {
+    setQuery("SELECT Id, Name FROM Account LIMIT 10")
+  }
 
   const executeQuery = async () => {
     if (!accessToken || !instanceUrl) {
@@ -165,7 +169,18 @@ export default function QueryPage() {
 
             {/* SOQL Query Input */}
             <div>
-              <Label htmlFor="soqlQuery">SOQL Query</Label>
+              <div className="flex items-center justify-between mb-2">
+                <Label htmlFor="soqlQuery">SOQL Query</Label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={resetQuery}
+                  className="h-6 px-2 text-xs"
+                >
+                  <RotateCcw className="w-3 h-3 mr-1" />
+                  Reset
+                </Button>
+              </div>
               <Textarea
                 id="soqlQuery"
                 value={query}
