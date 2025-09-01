@@ -266,19 +266,55 @@ export default function QueryPage() {
                   <div className="bg-secondary/20 border border-border rounded-lg p-4">
                     <h4 className="font-medium text-card-foreground mb-3">Records Preview</h4>
                     <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {queryResults.records.slice(0, 5).map((record, index) => (
-                        <div key={index} className="text-sm border-l-2 border-primary/30 pl-3">
-                          <div className="font-mono text-primary text-xs mb-1">Record {index + 1}</div>
-                          {Object.entries(record)
-                            .filter(([key]) => key !== 'attributes')
-                            .slice(0, 3)
-                            .map(([key, value]) => (
-                              <div key={key} className="text-muted-foreground">
-                                <span className="font-medium">{key}:</span> {String(value)}
+                      {queryResults.records.slice(0, 5).map((record, index) => {
+                        // Filter out Salesforce metadata attributes
+                        const filteredEntries = Object.entries(record)
+                          .filter(([key]) => key !== 'attributes')
+                        
+                        // Prioritize important fields for display
+                        const prioritizedEntries = filteredEntries.sort(([keyA], [keyB]) => {
+                          const priorityFields = ['Id', 'Name', 'Title', 'Email', 'Subject', 'Status', 'Type', 'Amount', 'CloseDate', 'StageName', 'AccountName', 'ContactName']
+                          const priorityA = priorityFields.indexOf(keyA)
+                          const priorityB = priorityFields.indexOf(keyB)
+                          
+                          if (priorityA !== -1 && priorityB !== -1) return priorityA - priorityB
+                          if (priorityA !== -1) return -1
+                          if (priorityB !== -1) return 1
+                          return keyA.localeCompare(keyB)
+                        })
+
+                        // Format field values based on type
+                        const formatValue = (value: any) => {
+                          if (value === null || value === undefined) return 'null'
+                          if (typeof value === 'boolean') return value.toString()
+                          if (typeof value === 'object') {
+                            // Handle relationship fields (e.g., Account.Name)
+                            if (value.Name) return value.Name
+                            if (value.Id) return `[${value.Id}]`
+                            return JSON.stringify(value)
+                          }
+                          // Truncate long text values
+                          const str = String(value)
+                          return str.length > 50 ? str.substring(0, 50) + '...' : str
+                        }
+
+                        return (
+                          <div key={index} className="text-sm border-l-2 border-primary/30 pl-3">
+                            <div className="font-mono text-primary text-xs mb-1">Record {index + 1}</div>
+                            {prioritizedEntries.slice(0, 4).map(([key, value]) => (
+                              <div key={key} className="text-muted-foreground flex items-start gap-2">
+                                <span className="font-medium text-card-foreground min-w-0 flex-shrink-0">{key}:</span>
+                                <span className="break-all">{formatValue(value)}</span>
                               </div>
                             ))}
-                        </div>
-                      ))}
+                            {prioritizedEntries.length > 4 && (
+                              <div className="text-xs text-muted-foreground/70 mt-1">
+                                + {prioritizedEntries.length - 4} more fields
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
                       {queryResults.records.length > 5 && (
                         <div className="text-xs text-muted-foreground text-center pt-2">
                           ... and {queryResults.records.length - 5} more records
