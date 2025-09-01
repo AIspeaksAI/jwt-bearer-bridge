@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Shield, ChevronDown, ChevronUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { useAppStore } from "@/lib/store"
 import ReactJsonView from "@microlink/react-json-view"
+import Confetti from "react-confetti"
 
 interface SalesforceResponse {
   access_token?: string
@@ -23,6 +24,9 @@ export default function AuthPage() {
   const [isExchanging, setIsExchanging] = useState(false)
   const [response, setResponse] = useState<SalesforceResponse | null>(null)
   const [isResponseExpanded, setIsResponseExpanded] = useState(false)
+  const [showConfetti, setShowConfetti] = useState(false)
+  const [shakeCard, setShakeCard] = useState(false)
+  const [windowDimension, setWindowDimension] = useState({ width: 0, height: 0 })
 
   const { toast } = useToast()
   const { 
@@ -33,6 +37,23 @@ export default function AuthPage() {
     setAccessToken, 
     setInstanceUrl 
   } = useAppStore()
+
+  // Set window dimensions for confetti
+  useEffect(() => {
+    const detectSize = () => {
+      setWindowDimension({
+        width: window.innerWidth,
+        height: window.innerHeight
+      })
+    }
+    
+    detectSize()
+    window.addEventListener('resize', detectSize)
+    
+    return () => {
+      window.removeEventListener('resize', detectSize)
+    }
+  }, [])
 
   const exchangeJWTForToken = async () => {
     if (!jwtToken) {
@@ -75,9 +96,12 @@ export default function AuthPage() {
       setIsResponseExpanded(true)
 
       if (response.ok && responseData.access_token && responseData.instance_url) {
-        // Success
+        // Success - trigger confetti
         setAccessToken(responseData.access_token)
         setInstanceUrl(responseData.instance_url)
+        
+        setShowConfetti(true)
+        setTimeout(() => setShowConfetti(false), 8000) // Stop confetti after 8 seconds
 
         toast({
           title: "Access Token Retrieved Successfully",
@@ -85,8 +109,11 @@ export default function AuthPage() {
           className: "border-primary bg-primary/10 text-primary [&>div]:text-primary"
         })
       } else {
-        // Error response
+        // Error response - trigger shake
         const errorMessage = responseData.error_description || responseData.error || "Unknown error occurred"
+        
+        setShakeCard(true)
+        setTimeout(() => setShakeCard(false), 800) // Remove shake after animation
         
         toast({
           variant: "destructive",
@@ -105,6 +132,10 @@ export default function AuthPage() {
       
       setResponse(errorResponse)
       setIsResponseExpanded(true)
+      
+      // Trigger shake for network errors too
+      setShakeCard(true)
+      setTimeout(() => setShakeCard(false), 800)
 
       toast({
         variant: "destructive",
@@ -118,8 +149,26 @@ export default function AuthPage() {
 
   return (
     <div className="container mx-auto px-6 py-8">
+      {showConfetti && (
+        <Confetti
+          width={windowDimension.width}
+          height={windowDimension.height}
+          recycle={false}
+          numberOfPieces={500}
+          gravity={0.3}
+          wind={0.05}
+          initialVelocityX={8}
+          initialVelocityY={25}
+          colors={[
+            '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57',
+            '#ff9ff3', '#54a0ff', '#5f27cd', '#00d2d3', '#ff9f43',
+            '#10ac84', '#ee5a24', '#0984e3', '#6c5ce7', '#fd79a8',
+            '#e17055', '#00b894', '#fdcb6e', '#e84393', '#74b9ff'
+          ]}
+        />
+      )}
       <div className="max-w-4xl mx-auto">
-        <div className="bg-card border border-border rounded-lg p-8">
+        <div className={`bg-card border border-border rounded-lg p-8 ${shakeCard ? 'animate-shake' : ''}`}>
           <div className="flex items-center space-x-3 mb-6">
             <Shield className="w-6 h-6 text-primary" />
             <div>
