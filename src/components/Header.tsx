@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Link as LinkIcon, Shield, Database } from "lucide-react"
+import { Link as LinkIcon, Shield, Database, Link2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export function Header() {
@@ -36,7 +36,7 @@ export function Header() {
           {/* Logo and Title */}
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <div className="w-4 h-4 border-2 border-primary-foreground rounded rotate-45"></div>
+              <Link2 className="w-5 h-5 text-primary-foreground" />
             </div>
             <h1 className="text-xl font-semibold text-foreground">JWT Bearer Bridge</h1>
           </div>

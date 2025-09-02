@@ -110,9 +110,9 @@ export default function HomePage() {
       console.log("Generated JWT:", jwt)
 
       toast({
+        variant: "success",
         title: "JWT Generated Successfully",
-        description: "Token has been generated and is ready for use.",
-        className: "border-primary bg-primary/10 text-primary [&>div]:text-primary"
+        description: "Token has been generated and is ready for use."
       })
 
     } catch (error) {
@@ -150,9 +150,9 @@ export default function HomePage() {
         await navigator.clipboard.writeText(jwtToken)
         setIsCopied(true)
         toast({
+          variant: "success",
           title: "JWT Copied",
-          description: "Token has been copied to clipboard",
-          className: "border-primary bg-primary/10 text-primary [&>div]:text-primary"
+          description: "Token has been copied to clipboard"
         })
         setTimeout(() => setIsCopied(false), 2000)
       } catch (error) {

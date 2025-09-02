@@ -82,9 +82,9 @@ export default function QueryPage() {
         const recordCount = responseData.totalSize || responseData.records.length || 0
         
         toast({
+          variant: "success",
           title: "Query Executed Successfully",
-          description: `Retrieved ${recordCount} record${recordCount !== 1 ? 's' : ''} from Salesforce.`,
-          className: "border-primary bg-primary/10 text-primary [&>div]:text-primary"
+          description: `Retrieved ${recordCount} record${recordCount !== 1 ? 's' : ''} from Salesforce.`
         })
       } else {
         // Error response

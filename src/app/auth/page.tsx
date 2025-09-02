@@ -104,9 +104,9 @@ export default function AuthPage() {
         setTimeout(() => setShowConfetti(false), 8000) // Stop confetti after 8 seconds
 
         toast({
+          variant: "success",
           title: "Access Token Retrieved Successfully",
-          description: "You can now use the API Query page to execute SOQL queries.",
-          className: "border-primary bg-primary/10 text-primary [&>div]:text-primary"
+          description: "You can now use the API Query page to execute SOQL queries."
         })
       } else {
         // Error response - trigger shake
